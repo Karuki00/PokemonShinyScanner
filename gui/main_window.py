@@ -7,11 +7,14 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import QObject, Signal, Qt
 
 from .party_view import PartyView
+from .pokemon_card import PokemonCard
 from core.memory_scanner import MemoryScanner
+from core.pokemon_data import get_pokemon
 
 
 class ScannerSignals(QObject):
     party_updated = Signal(list)
+    wild_updated = Signal(dict)
     scanner_error = Signal(str)
 
 
@@ -27,6 +30,7 @@ class MainWindow(QMainWindow):
 
         self.signals = ScannerSignals()
         self.signals.party_updated.connect(self.update_party)
+        self.signals.wild_updated.connect(self.update_wild)
         self.signals.scanner_error.connect(self.show_scanner_error)
 
         self.connected = False
@@ -142,31 +146,38 @@ class MainWindow(QMainWindow):
         self.party_view = PartyView()
         player_layout.addWidget(self.party_view, 1)
 
-        # Wild Pokémon placeholder
+        
+        # Wild Pokémon panel
         wild_panel = QFrame()
         wild_panel.setObjectName("mainPanel")
 
         wild_layout = QVBoxLayout(wild_panel)
-        wild_layout.setContentsMargins(14, 12, 14, 12)
+        wild_layout.setContentsMargins(12, 12, 12, 12)
         wild_layout.setSpacing(6)
 
         wild_title = QLabel("WILD POKÉMON")
         wild_title.setObjectName("sectionTitle")
 
-        wild_description = QLabel("Encounter detection will be added later")
+        wild_description = QLabel(
+            "Latest detected wild encounter"
+        )
         wild_description.setObjectName("panelDescription")
 
         wild_layout.addWidget(wild_title)
         wild_layout.addWidget(wild_description)
 
-        self.wild_placeholder = QLabel(
-            "WAITING FOR ENCOUNTER\n\n"
-            "Wild Pokémon detection\nis not active yet."
-        )
-        self.wild_placeholder.setObjectName("wildPlaceholder")
-        self.wild_placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.wild_card = PokemonCard()
+        self.wild_card.slot_label.setText("WILD ENCOUNTER")
 
-        wild_layout.addWidget(self.wild_placeholder, 1)
+        wild_layout.addWidget(self.wild_card, 1)
+
+        self.wild_status = QLabel(
+            "Waiting for a new wild encounter..."
+        )
+        self.wild_status.setObjectName("panelDescription")
+
+        wild_layout.addWidget(self.wild_status)
+
 
         panels.addWidget(player_panel, 1)
         panels.addWidget(wild_panel, 1)
@@ -222,7 +233,8 @@ class MainWindow(QMainWindow):
         self.scanner.start(
             on_update=self.signals.party_updated.emit,
             on_error=lambda error:
-                self.signals.scanner_error.emit(str(error))
+                self.signals.scanner_error.emit(str(error)),
+            on_wild_update=self.signals.wild_updated.emit
         )
 
         self.scanning = True
@@ -249,6 +261,28 @@ class MainWindow(QMainWindow):
 
     def update_party(self, pokemon_list):
         self.party_view.update_party(pokemon_list)
+
+    def update_wild(self, pokemon):
+        self.wild_card.set_pokemon(pokemon)
+        self.wild_card.slot_label.setText("WILD ENCOUNTER")
+
+        species_id = pokemon["species"]
+
+        species_data = get_pokemon(species_id)
+
+        if species_data:
+            species_name = species_data["name"]
+        else:
+            species_name = f"Unknown Species #{species_id}"
+
+        if pokemon["shiny"]:
+            self.wild_status.setText(
+                f"SHINY WILD ENCOUNTER DETECTED: {species_name}!"
+            )
+        else:
+            self.wild_status.setText(
+                f"Wild encounter detected: {species_name}"
+            )
 
     def show_scanner_error(self, message):
         self.scan_status.setText(
