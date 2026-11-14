@@ -344,7 +344,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Emerald Shiny Scanner")
+        self.setWindowTitle("Pokémon Shiny Scanner")
         self.resize(1150, 760)
         self.setMinimumSize(900, 650)
 
@@ -353,7 +353,7 @@ class MainWindow(QMainWindow):
         # Persistent shiny hunt counters
         self.settings = QSettings(
             "Karuki00",
-            "EMERALD SHINY SCANNER"
+            "POKÉMON SHINY SCANNER"
         )
 
         self.starter_resets = int(
@@ -615,7 +615,7 @@ class MainWindow(QMainWindow):
         title_layout = QVBoxLayout()
         title_layout.setSpacing(1)
 
-        title = QLabel("EMERALD SHINY SCANNER")
+        title = QLabel("POKEMON SHINY SCANNER")
         title.setObjectName("mainTitle")
 
         subtitle = QLabel("POKÉMON EMERALD / HOENN")
