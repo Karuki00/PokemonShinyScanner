@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
     QLabel, QProgressBar, QGridLayout
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QPainter, QColor
 
 from core.pokemon_data import get_pokemon, get_ability
 
@@ -24,6 +24,17 @@ NATURE_NAMES = [
 ]
 
 
+class ProfileDivider(QFrame):
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setPen(QColor("#8FE8D1"))
+        line_height = max(1, int(self.height() * 0.8))
+        top = (self.height() - line_height) // 2
+        painter.drawLine(self.width() // 2, top, self.width() // 2,
+                         top + line_height)
+        painter.end()
+
+
 class PokemonCard(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -31,11 +42,13 @@ class PokemonCard(QFrame):
         self.setObjectName("pokemonCard")
 
         outer_layout = QVBoxLayout(self)
+        self.outer_layout = outer_layout
         outer_layout.setContentsMargins(12, 10, 12, 10)
         outer_layout.setSpacing(8)
 
         # Card heading
         heading = QHBoxLayout()
+        self.heading_layout = heading
 
         self.slot_label = QLabel("PARTY SLOT 1")
         self.slot_label.setObjectName("slotLabel")
@@ -54,11 +67,13 @@ class PokemonCard(QFrame):
 
         # Pokémon overview
         overview = QHBoxLayout()
+        self.overview_layout = overview
         overview.setSpacing(14)
 
         self.sprite_container = QFrame()
         self.sprite_container.setObjectName("spriteContainer")
         self.sprite_container.setFixedSize(156, 156)
+        self._sprite_size = 128
 
         sprite_layout = QVBoxLayout(self.sprite_container)
         sprite_layout.setContentsMargins(4, 4, 4, 4)
@@ -72,8 +87,12 @@ class PokemonCard(QFrame):
 
         overview.addWidget(self.sprite_container)
 
-        details_layout = QVBoxLayout()
+        self.details_panel = QFrame()
+        self.details_panel.setObjectName("detailsPanel")
+
+        details_layout = QVBoxLayout(self.details_panel)
         details_layout.setSpacing(5)
+        details_layout.setContentsMargins(14, 14, 14, 14)
 
         self.name_label = QLabel("Waiting for Pokémon")
         self.name_label.setObjectName("pokemonName")
@@ -95,23 +114,26 @@ class PokemonCard(QFrame):
         details_layout.addWidget(self.species_label)
         details_layout.addStretch()
 
-        overview.addLayout(details_layout, 1)
+        overview.addWidget(self.details_panel, 1)
 
         outer_layout.addLayout(overview)
 
         # Advanced Pokémon data
         separator = QFrame()
+        self.separator = separator
         separator.setObjectName("separator")
         separator.setFrameShape(QFrame.Shape.HLine)
 
         outer_layout.addWidget(separator)
 
         advanced_title = QLabel("ADVANCED DATA")
+        self.iv_title = advanced_title
         advanced_title.setObjectName("ivTitle")
 
         outer_layout.addWidget(advanced_title)
 
         identity_grid = QGridLayout()
+        self.identity_grid = identity_grid
         identity_grid.setHorizontalSpacing(14)
         identity_grid.setVerticalSpacing(5)
 
@@ -134,6 +156,7 @@ class PokemonCard(QFrame):
         outer_layout.addLayout(identity_grid)
 
         separator2 = QFrame()
+        self.separator2 = separator2
         separator2.setObjectName("separator")
         separator2.setFrameShape(QFrame.Shape.HLine)
 
@@ -141,6 +164,7 @@ class PokemonCard(QFrame):
 
         # Individual values
         iv_title = QLabel("INDIVIDUAL VALUES (IVs)")
+        self.iv_title_label = iv_title
         iv_title.setObjectName("ivTitle")
 
         outer_layout.addWidget(iv_title)
@@ -157,6 +181,7 @@ class PokemonCard(QFrame):
         ]
 
         iv_grid = QGridLayout()
+        self.iv_grid = iv_grid
         iv_grid.setHorizontalSpacing(12)
         iv_grid.setVerticalSpacing(7)
 
@@ -205,12 +230,102 @@ class PokemonCard(QFrame):
 
         self.sprite_label.setPixmap(
             pixmap.scaled(
-                128,
-                128,
+                self._sprite_size,
+                self._sprite_size,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.FastTransformation
             )
         )
+
+    def set_showcase_sprite(self):
+        """Use a profile layout with the sprite separated from its data."""
+
+        self._sprite_size = 224
+        self.sprite_container.setFixedSize(260, 260)
+        self.sprite_container.layout().setContentsMargins(0, 0, 0, 0)
+
+        while self.outer_layout.count():
+            self.outer_layout.takeAt(0)
+
+        while self.overview_layout.count():
+            self.overview_layout.takeAt(0)
+
+        while self.heading_layout.count():
+            self.heading_layout.takeAt(0)
+
+        self.separator.hide()
+        self.separator2.hide()
+
+        identity_items = []
+        while self.identity_grid.count():
+            identity_items.append(self.identity_grid.takeAt(0))
+        for row, item in enumerate(identity_items):
+            self.identity_grid.addWidget(
+                item.widget(),
+                row,
+                0,
+                alignment=Qt.AlignmentFlag.AlignLeft
+            )
+
+        for label in (
+            self.pid_label,
+            self.otid_label,
+            self.ability_slot_label
+        ):
+            label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        sprite_panel = QFrame(self)
+        sprite_panel.setObjectName("summarySpritePanel")
+        sprite_panel_layout = QVBoxLayout(sprite_panel)
+        sprite_panel_layout.setContentsMargins(18, 18, 18, 18)
+        sprite_panel_layout.setSpacing(10)
+        sprite_panel_layout.addWidget(
+            self.slot_label,
+            alignment=Qt.AlignmentFlag.AlignLeft
+        )
+        sprite_panel_layout.addWidget(
+            self.sprite_container,
+            alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        sprite_panel_layout.addWidget(
+            self.shiny_label,
+            alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        sprite_panel_layout.addStretch()
+
+        data_panel = QFrame(self)
+        data_panel.setObjectName("summaryDataPanel")
+        data_layout = QVBoxLayout(data_panel)
+        data_layout.setContentsMargins(22, 18, 22, 18)
+        data_layout.setSpacing(9)
+        data_layout.addWidget(self.details_panel)
+
+        advanced_section = QFrame(data_panel)
+        advanced_section.setObjectName("summaryAdvancedSection")
+        advanced_layout = QVBoxLayout(advanced_section)
+        advanced_layout.setContentsMargins(14, 12, 14, 12)
+        advanced_layout.setSpacing(7)
+        advanced_layout.addWidget(self.iv_title)
+        advanced_layout.addLayout(self.identity_grid)
+        advanced_layout.addWidget(self.iv_title_label)
+        advanced_layout.addLayout(self.iv_grid)
+        data_layout.addWidget(advanced_section)
+
+        profile_layout = QHBoxLayout()
+        profile_layout.setSpacing(18)
+        profile_layout.addWidget(sprite_panel, 0)
+        profile_divider = ProfileDivider(self)
+        profile_divider.setObjectName("profileDivider")
+        profile_divider.setFrameShape(QFrame.Shape.VLine)
+        profile_divider.setFrameShadow(QFrame.Shadow.Plain)
+        profile_layout.addWidget(profile_divider)
+        profile_layout.addWidget(data_panel, 1)
+        self.outer_layout.setContentsMargins(18, 18, 18, 18)
+        self.outer_layout.addLayout(profile_layout)
+
+        self.setProperty("showcase", True)
+        self.style().unpolish(self)
+        self.style().polish(self)
 
     def set_empty(self):
         self.name_label.setText("Waiting for Pokémon")
