@@ -1,10 +1,12 @@
-# Emerald Shiny Scanner
+# Pokémon Shiny Scanner
 
-A Pokémon Emerald companion application for Windows that reads Pokémon data directly from VisualBoyAdvance and displays information such as IVs, nature, shiny status, species, and abilities through a separate PySide6 interface.
+A multi-generation Pokémon companion application for Windows, starting with Pokémon Emerald. It reads Pokémon data directly from VisualBoyAdvance and displays information such as IVs, nature, shiny status, species, and abilities through a separate PySide6 interface.
 
 **Project status:** Early Development — v0.1.0
 
-**Repository:** [Karuki00/EmeraldShinyScanner](https://github.com/Karuki00/EmeraldShinyScanner)
+**Current game support:** Pokémon Emerald (Generation III)
+
+**Repository:** [Karuki00/PokemonShinyScanner](https://github.com/Karuki00/PokemonShinyScanner)
 
 **Developer:** [Karuki00](https://github.com/Karuki00)
 
@@ -12,21 +14,49 @@ A Pokémon Emerald companion application for Windows that reads Pokémon data di
 
 ## Overview
 
-Emerald Shiny Scanner is a companion tool for Pokémon Emerald players who want to inspect their Pokémon without repeatedly navigating external calculators.
+Pokémon Shiny Scanner is a companion application designed to help Pokémon players inspect Pokémon data and track their shiny-hunting progress without repeatedly navigating external calculators.
 
 The application connects to a running VisualBoyAdvance process, reads relevant game memory, decodes Pokémon data using Generation III structures, and presents the results in a dedicated graphical interface.
 
-The project is being developed with an emphasis on accuracy, lightweight operation, and a Pokémon-themed user experience.
+The project is designed with future multi-generation compatibility in mind. However, the initial v0.1.0 release focuses exclusively on Pokémon Emerald.
+
+The long-term goal is to expand support to other Pokémon games across multiple generations.
 
 ## Current Features
 
-- **Live Party Monitoring** — Reads Pokémon data from the player's party.
+- **Live Party Monitoring** — Reads and displays Pokémon data from the player's party.
+- **Starter Pokémon Scanning** — Detects and analyzes starter Pokémon data.
+- **Wild Encounter Detection** — Detects Pokémon encountered in the wild.
+- **Wild Pokémon IV Analysis** — Calculates and displays IVs for wild Pokémon.
 - **IV Calculation** — Extracts HP, Attack, Defense, Special Attack, Special Defense, and Speed IVs.
 - **Shiny Detection** — Determines whether a Pokémon is shiny using its personality value and original trainer ID.
-- **Nature Identification** — Displays the Pokémon's nature.
+- **Nature Identification** — Identifies and displays the Pokémon's nature.
 - **Ability Identification** — Resolves the Pokémon's ability name.
 - **Species Identification** — Identifies Pokémon using Generation III species data.
-- **PySide6 Interface** — Displays Pokémon information in a separate desktop window.
+- **Encounter Counter and Statistics** — Tracks shiny-hunting encounters and related statistics.
+- **PySide6 Interface** — Displays Pokémon information through a separate desktop window.
+
+## Supported Games and Compatibility
+
+### Current Support
+
+| Game | Generation | Status |
+|---|---|---|
+| Pokémon Emerald | III | Supported |
+
+### Planned Expansion
+
+| Game | Generation | Status |
+|---|---|---|
+| Pokémon Ruby | III | Planned |
+| Pokémon Sapphire | III | Planned |
+| Pokémon FireRed | III | Planned |
+| Pokémon LeafGreen | III | Planned |
+| Pokémon Gold / Silver / Crystal | II | Future consideration |
+| Pokémon Diamond / Pearl / Platinum | IV | Future consideration |
+| Pokémon HeartGold / SoulSilver | IV | Future consideration |
+
+Game compatibility requires appropriate memory-reading profiles and, where necessary, generation-specific Pokémon data decoders.
 
 ## Requirements
 
@@ -40,8 +70,8 @@ The project is being developed with an emphasis on accuracy, lightweight operati
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Karuki00/EmeraldShinyScanner.git
-cd EmeraldShinyScanner
+git clone https://github.com/Karuki00/PokemonShinyScanner.git
+cd PokemonShinyScanner
 ```
 
 ### 2. Create a virtual environment
@@ -84,7 +114,7 @@ Start Pokémon Emerald in VisualBoyAdvance before connecting the scanner.
 ## Project Structure
 
 ```text
-EmeraldShinyScanner/
+PokemonShinyScanner/
 │
 ├── assets/
 │   ├── pc_box/
@@ -109,7 +139,7 @@ EmeraldShinyScanner/
 │
 ├── download_emerald_sprites.py
 ├── generate_pokemon_data.py
-├── EmeraldShinyScanner.spec
+├── PokemonShinyScanner.spec
 ├── main.py
 ├── requirements.txt
 ├── LICENSE
@@ -126,6 +156,7 @@ EmeraldShinyScanner/
 - [x] Species and ability identification
 - [x] Initial PySide6 graphical interface
 - [x] Wild encounter detection
+- [x] Starter Pokémon scanning
 - [x] Wild Pokémon IV analysis
 - [x] Encounter counter and statistics
 - [ ] Further UI refinement
@@ -139,10 +170,10 @@ The project includes a PyInstaller specification file.
 To build the application:
 
 ```bash
-pyinstaller EmeraldShinyScanner.spec
+pyinstaller PokemonShinyScanner.spec
 ```
 
-The resulting build is intended to be distributed with its required assets and dependencies.
+The resulting Windows application is intended to be distributed with its required assets and dependencies.
 
 ## Contributing
 
