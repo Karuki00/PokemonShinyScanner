@@ -1,197 +1,164 @@
-# Emerald IV Scanner
+# Emerald Shiny Scanner
 
-A Windows desktop application for monitoring and analyzing Pokémon IVs in **Pokémon Emerald** in real time.
+A Pokémon Emerald companion application for Windows that reads Pokémon data directly from VisualBoyAdvance and displays information such as IVs, nature, shiny status, species, and abilities through a separate PySide6 interface.
 
-Emerald IV Scanner reads Pokémon party data directly from VisualBoyAdvance memory, decodes Generation III Pokémon data, and presents the results through a graphical interface built with Python and PySide6.
+**Project status:** Early Development — v0.1.0
 
-> **Development status:** Early development (v0.1.0). Party Pokémon scanning is implemented. Wild encounter scanning is planned.
+**Repository:** [Karuki00/EmeraldShinyScanner](https://github.com/Karuki00/EmeraldShinyScanner)
 
-## Features
+**Developer:** [Karuki00](https://github.com/Karuki00)
 
-- **Live Party Scanning** — Reads Pokémon data directly from VisualBoyAdvance.
-- **Generation III Decoder** — Decodes Pokémon personality values, Original Trainer IDs, species, natures, abilities, shininess, and individual values.
-- **IV Analysis** — Displays HP, Attack, Defense, Special Attack, Special Defense, and Speed IVs.
-- **Pokémon Interface** — Displays Pokémon using species data and Pokémon Emerald normal/shiny sprites.
-- **VisualBoyAdvance Integration** — Connects to the running emulator process through Windows process memory reading.
-- **Desktop GUI** — Built with PySide6.
+---
 
-## Screenshots
+## Overview
 
-\<!-- Add application screenshots here -->
+Emerald Shiny Scanner is a companion tool for Pokémon Emerald players who want to inspect their Pokémon without repeatedly navigating external calculators.
+
+The application connects to a running VisualBoyAdvance process, reads relevant game memory, decodes Pokémon data using Generation III structures, and presents the results in a dedicated graphical interface.
+
+The project is being developed with an emphasis on accuracy, lightweight operation, and a Pokémon-themed user experience.
+
+## Current Features
+
+- **Live Party Monitoring** — Reads Pokémon data from the player's party.
+- **IV Calculation** — Extracts HP, Attack, Defense, Special Attack, Special Defense, and Speed IVs.
+- **Shiny Detection** — Determines whether a Pokémon is shiny using its personality value and original trainer ID.
+- **Nature Identification** — Displays the Pokémon's nature.
+- **Ability Identification** — Resolves the Pokémon's ability name.
+- **Species Identification** — Identifies Pokémon using Generation III species data.
+- **PySide6 Interface** — Displays Pokémon information in a separate desktop window.
 
 ## Requirements
 
-- Windows 10/11 (64-bit recommended)
-- Python 3.14 or a compatible Python version
-- VisualBoyAdvance 1.8 beta 3
+- Windows 10 or Windows 11
+- Python 3.14 or a compatible version supported by the dependencies
+- VisualBoyAdvance 1.8 Beta 3
 - A legally obtained Pokémon Emerald ROM
 
 ## Installation
 
-### Option 1: Download the application
-
-1. Visit the [Releases](../../releases) page.
-2. Download the latest Windows release.
-3. Extract the downloaded ZIP archive.
-4. Run `EmeraldIVScanner.exe`.
-
-Python installation is not required when using the packaged application.
-
-### Option 2: Run from source
-
-Clone the repository:
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/EmeraldIVScanner.git
-cd EmeraldIVScanner
+git clone https://github.com/Karuki00/EmeraldShinyScanner.git
+cd EmeraldShinyScanner
 ```
 
-Install the dependencies:
+### 2. Create a virtual environment
 
 ```bash
-python -m pip install PySide6 pymem
+python -m venv .venv
 ```
 
-Run the application:
+Activate it:
+
+```bash
+.venv\Scripts\activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Prepare application data and sprites
+
+The repository includes the generated Pokémon data module. If you need to regenerate it or download the sprite collection, run:
+
+```bash
+python generate_pokemon_data.py
+python download_emerald_sprites.py
+```
+
+These scripts require an internet connection.
+
+### 5. Launch the application
 
 ```bash
 python main.py
 ```
 
-## Building from Source
-
-Install PyInstaller:
-
-```bash
-python -m pip install pyinstaller
-```
-
-Build the Windows application:
-
-```bash
-python -m PyInstaller ^
-    --noconfirm ^
-    --clean ^
-    --windowed ^
-    --onedir ^
-    --name EmeraldIVScanner ^
-    --collect-all PySide6 ^
-    --add-data "assets;assets" ^
-    main.py
-```
-
-The packaged application will be generated inside:
-
-```text
-dist/EmeraldIVScanner/
-```
+Start Pokémon Emerald in VisualBoyAdvance before connecting the scanner.
 
 ## Project Structure
 
 ```text
-EmeraldIVScanner/
+EmeraldShinyScanner/
 │
-├── main.py
+├── assets/
+│   ├── pc_box/
+│   ├── sound_effects/
+│   └── pokemon/
+│       └── shiny/
+│
 ├── core/
+│   ├── __init__.py
 │   ├── gen3_decoder.py
 │   ├── memory_reader.py
 │   ├── memory_scanner.py
-│   └── validator.py
+│   ├── pokemon_data.py
+│   ├── validator.py
+│   └── wild_reader.py
 │
 ├── gui/
+│   ├── __init__.py
 │   ├── main_window.py
 │   ├── party_view.py
 │   └── pokemon_card.py
 │
-├── assets/
-│   ├── pokemon/
-│   ├── pc_box/
-│   └── sound_effects/
-│
-├── tests/
-│   └── ...
-│
+├── download_emerald_sprites.py
+├── generate_pokemon_data.py
+├── EmeraldShinyScanner.spec
+├── main.py
 ├── requirements.txt
-├── .gitignore
+├── LICENSE
 └── README.md
 ```
 
-## Preparing Application Data and Assets
+## Roadmap
 
-The repository includes scripts for generating Pokémon species data and downloading Pokémon Emerald sprites.
-
-These scripts require an internet connection.
-
-### 1. Generate Pokémon species data
-
-```bash
-python generate_pokemon_data.py
-```
-
-This generates:
-
-```text
-core/pokemon_data.py
-```
-
-### 2. Download Pokémon Emerald sprites
-
-```bash
-python download_emerald_sprites.py
-```
-
-This downloads normal and shiny sprites into:
-
-```text
-assets/pokemon/
-```
-
-Existing valid sprites are skipped, allowing interrupted downloads to be resumed.
-
-### 3. Launch the application
-
-```bash
-python main.py
-```
-
-**Note:** The generated species database is included in the repository. Running the generator again is optional unless you want to regenerate it from upstream data.
-
-*The structure above illustrates the main application components; individual test files may remain in the project root.*
-
-## Development Roadmap
-
-- [x] Generation III Pokémon data decoder
-- [x] VisualBoyAdvance memory reading
-- [x] Party Pokémon detection
-- [x] Individual Value calculation and display
-- [x] Pokémon species data integration
-- [x] Emerald normal and shiny sprite integration
-- [x] PySide6 graphical interface
+- [x] Generation III Pokémon data decoding
+- [x] Live party memory reading
+- [x] IV calculation
+- [x] Nature identification
+- [x] Shiny detection
+- [x] Species and ability identification
+- [x] Initial PySide6 graphical interface
 - [x] Wild encounter detection
 - [x] Wild Pokémon IV analysis
-- [ ] Improved validation and memory-reading reliability
-- [ ] Application installer and distribution improvements
+- [x] Encounter counter and statistics
+- [ ] Further UI refinement
+- [ ] Improved validation and error handling
+- [ ] Public Windows release
 
-## Technology Stack
+## Building
 
-| Technology       | Purpose                       |
-| ---------------- | ----------------------------- |
-| Python           | Core application language     |
-| PySide6          | Desktop graphical interface   |
-| PyMem            | Windows process memory access |
-| PyInstaller      | Windows executable packaging  |
-| VisualBoyAdvance | Game emulator                 |
+The project includes a PyInstaller specification file.
 
-## Disclaimer
+To build the application:
 
-Emerald IV Scanner is an independent fan-made utility. It is not affiliated with, endorsed by, or associated with Nintendo, The Pokémon Company, Game Freak, or VisualBoyAdvance developers.
+```bash
+pyinstaller EmeraldShinyScanner.spec
+```
 
-Pokémon and related characters, names, sprites, and trademarks belong to their respective owners.
+The resulting build is intended to be distributed with its required assets and dependencies.
 
-This project does not include or distribute Pokémon Emerald ROM files. Users are responsible for obtaining and using game files in accordance with applicable laws.
+## Contributing
+
+Suggestions, bug reports, and contributions are welcome.
+
+If you encounter an issue, please provide:
+
+- A description of the issue.
+- Steps to reproduce it.
+- Relevant error messages or screenshots.
+- Your VisualBoyAdvance version.
 
 ## License
 
-The original source code of Emerald IV Scanner is distributed under the MIT License. See [LICENSE](LICENSE) for details.
+The project's source code is distributed under the MIT License. See [LICENSE](LICENSE) for details.
 
-Third-party libraries and assets may be subject to their own respective licenses and terms.
+Pokémon and all related names, characters, and assets are trademarks and copyrights of their respective owners. This project is an unofficial fan-made tool and is not affiliated with, endorsed by, or associated with Nintendo, The Pokémon Company, or Game Freak.
+
+Pokémon game data and sprite assets retain their respective ownership and licensing considerations.
