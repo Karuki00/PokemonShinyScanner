@@ -1,195 +1,108 @@
 # Pokémon Shiny Scanner
 
-A multi-generation Pokémon companion application for Windows, starting with Pokémon Emerald. It reads Pokémon data directly from VisualBoyAdvance and displays information such as IVs, nature, shiny status, species, and abilities through a separate PySide6 interface.
+An offline Windows companion app for inspecting Generation III Pokémon data and tracking shiny hunts in VisualBoyAdvance. The project began as a Python/PySide6 application and is migrating to a Tauri + Rust desktop app.
 
-**Project status:** Early Development — v0.1.0
-
-**Current game support:** Pokémon Emerald (Generation III)
+**Current release:** `0.2.0` — Gen III region migration milestone
 
 **Repository:** [Karuki00/PokemonShinyScanner](https://github.com/Karuki00/PokemonShinyScanner)
 
-**Developer:** [Karuki00](https://github.com/Karuki00)
+## Supported games
 
----
+| Region | Game | Generation | Status |
+|---|---|---:|---|
+| Hoenn | Pokémon Emerald | III | Supported |
+| Hoenn | Pokémon Ruby | III | Supported and live validated |
+| Hoenn | Pokémon Sapphire | III | Supported and live validated |
+| Kanto | Pokémon FireRed | III | Supported and live validated |
+| Kanto | Pokémon LeafGreen | III | Implemented with the shared US Kanto profile; validate against your ROM revision |
+| — | Pokémon Gold / Silver / Crystal | II | Planned |
 
-## Overview
+The first launch presents a region picker for Hoenn or Kanto. The active region can be changed later with **Change Region** in the sidebar. The scanner remembers the selected game locally, but all Pokémon data, sprites, and sound effects are bundled into the application so the Tauri build works offline.
 
-Pokémon Shiny Scanner is a companion application designed to help Pokémon players inspect Pokémon data and track their shiny-hunting progress without repeatedly navigating external calculators.
+Compatibility depends on the ROM language/revision and emulator memory layout. The current Gen III profiles target the US VisualBoyAdvance layouts. Non-US or modified ROMs may require a separate profile.
 
-The application connects to a running VisualBoyAdvance process, reads relevant game memory, decodes Pokémon data using Generation III structures, and presents the results in a dedicated graphical interface.
+## Features
 
-The project is designed with future multi-generation compatibility in mind. However, the initial v0.1.0 release focuses exclusively on Pokémon Emerald.
+- Live party monitoring with species, nature, ability, shiny status, PID/OTID, checksum, and IVs.
+- Wild encounter detection and encounter counters.
+- Starter soft-reset tracking with `Ctrl + R` while VisualBoyAdvance is focused.
+- Hoenn and Kanto region/game selection.
+- Theme-aware Pokémon summary panels with bundled sprites and sound effects.
+- Offline-first Tauri + Rust desktop runtime; no runtime download is required.
+- Legacy Python/PySide6 implementation retained for reference during migration.
 
-The long-term goal is to expand support to other Pokémon games across multiple generations.
+## Recommended release installation
 
-## Current Features
+Download the Windows installer from the GitHub Release assets. The installer contains the frontend, Pokémon sprites, shiny sprites, PC box backgrounds, and sound effects. No Python, Node.js, or internet connection is required for the released Tauri application.
 
-- **Live Party Monitoring** — Reads and displays Pokémon data from the player's party.
-- **Starter Pokémon Scanning** — Detects and analyzes starter Pokémon data.
-- **Wild Encounter Detection** — Detects Pokémon encountered in the wild.
-- **Wild Pokémon IV Analysis** — Calculates and displays IVs for wild Pokémon.
-- **IV Calculation** — Extracts HP, Attack, Defense, Special Attack, Special Defense, and Speed IVs.
-- **Shiny Detection** — Determines whether a Pokémon is shiny using its personality value and original trainer ID.
-- **Nature Identification** — Identifies and displays the Pokémon's nature.
-- **Ability Identification** — Resolves the Pokémon's ability name.
-- **Species Identification** — Identifies Pokémon using Generation III species data.
-- **Encounter Counter and Statistics** — Tracks shiny-hunting encounters and related statistics.
-- **PySide6 Interface** — Displays Pokémon information through a separate desktop window.
+Use a ROM legally obtained for your own use and start it in VisualBoyAdvance before starting the scanner.
 
-## Supported Games and Compatibility
+## Development setup
 
-### Current Support
+### Tauri + Rust application
 
-| Game | Generation | Status |
-|---|---|---|
-| Pokémon Emerald | III | Supported |
-
-### Planned Expansion
-
-| Game | Generation | Status |
-|---|---|---|
-| Pokémon Ruby | III | Planned |
-| Pokémon Sapphire | III | Planned |
-| Pokémon FireRed | III | Planned |
-| Pokémon LeafGreen | III | Planned |
-| Pokémon Gold / Silver / Crystal | II | Future consideration |
-| Pokémon Diamond / Pearl / Platinum | IV | Future consideration |
-| Pokémon HeartGold / SoulSilver | IV | Future consideration |
-
-Game compatibility requires appropriate memory-reading profiles and, where necessary, generation-specific Pokémon data decoders.
-
-## Requirements
+Requirements:
 
 - Windows 10 or Windows 11
-- Python 3.14 or a compatible version supported by the dependencies
-- VisualBoyAdvance 1.8 Beta 3
-- A legally obtained Pokémon Emerald ROM
+- Rust toolchain compatible with the `rust-version` in `tauri-app/src-tauri/Cargo.toml`
+- Node.js and pnpm
+- VisualBoyAdvance 1.8 Beta 3 or a compatible VBA build
 
-## Installation
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/Karuki00/PokemonShinyScanner.git
-cd PokemonShinyScanner
+```powershell
+cd tauri-app
+pnpm install
+pnpm tauri dev
 ```
 
-### 2. Create a virtual environment
+Checks used before release:
 
-```bash
+```powershell
+pnpm build
+cargo test --manifest-path src-tauri/Cargo.toml
+```
+
+The Tauri frontend imports assets from `tauri-app/src/assets`, so those files must remain tracked in Git. Do not commit `node_modules`, `dist`, `target`, or local logs.
+
+### Legacy Python application
+
+```powershell
 python -m venv .venv
-```
-
-Activate it:
-
-```bash
 .venv\Scripts\activate
-```
-
-### 3. Install dependencies
-
-```bash
 pip install -r requirements.txt
-```
-
-### 4. Prepare application data and sprites
-
-The repository includes the generated Pokémon data module. If you need to regenerate it or download the sprite collection, run:
-
-```bash
-python generate_pokemon_data.py
-python download_emerald_sprites.py
-```
-
-These scripts require an internet connection.
-
-### 5. Launch the application
-
-```bash
 python main.py
 ```
 
-Start Pokémon Emerald in VisualBoyAdvance before connecting the scanner.
+The Python sprite/data generation scripts are retained for migration support. Normal Tauri users do not need to run them.
 
-## Project Structure
+## Project structure
 
 ```text
 PokemonShinyScanner/
-│
-├── assets/
-│   ├── pc_box/
-│   ├── sound_effects/
-│   └── pokemon/
-│       └── shiny/
-│
-├── core/
-│   ├── __init__.py
-│   ├── gen3_decoder.py
-│   ├── memory_reader.py
-│   ├── memory_scanner.py
-│   ├── pokemon_data.py
-│   ├── validator.py
-│   └── wild_reader.py
-│
-├── gui/
-│   ├── __init__.py
-│   ├── main_window.py
-│   ├── party_view.py
-│   └── pokemon_card.py
-│
-├── download_emerald_sprites.py
-├── generate_pokemon_data.py
-├── PokemonShinyScanner.spec
-├── main.py
-├── requirements.txt
+├── tauri-app/
+│   ├── src/                 React UI and bundled assets
+│   └── src-tauri/           Rust scanner, decoders, and game profiles
+├── core/                    Legacy Python memory/decoder modules
+├── gui/                     Legacy PySide6 UI
+├── assets/                  Legacy Python UI assets
+├── tools/                   Migration/data-generation tools
 ├── LICENSE
 └── README.md
 ```
 
 ## Roadmap
 
-- [x] Generation III Pokémon data decoding
-- [x] Live party memory reading
-- [x] IV calculation
-- [x] Nature identification
-- [x] Shiny detection
-- [x] Species and ability identification
-- [x] Initial PySide6 graphical interface
-- [x] Wild encounter detection
-- [x] Starter Pokémon scanning
-- [x] Wild Pokémon IV analysis
-- [x] Encounter counter and statistics
-- [ ] Further UI refinement
-- [ ] Improved validation and error handling
-- [ ] Public Windows release
+- [x] Gen III Pokémon decoding, IVs, natures, abilities, and shiny detection.
+- [x] Tauri + Rust migration foundation.
+- [x] Hoenn region picker and Emerald/Ruby/Sapphire profiles.
+- [x] Kanto region picker and FireRed profile.
+- [x] LeafGreen profile using the shared US Kanto layout.
+- [ ] Validate LeafGreen with a live party and wild encounter.
+- [ ] Add ROM revision/language profile detection.
+- [ ] Add Generation I/II Game Boy Color scanner support.
+- [ ] Add automated Windows release builds and checksums.
 
-## Building
+## Assets and attribution
 
-The project includes a PyInstaller specification file.
+Sprites are bundled for offline use and were sourced through the project’s sprite download tooling from the [PokeAPI sprites repository](https://github.com/PokeAPI/sprites). Pokémon names, characters, game data, and related assets remain the property of their respective owners. This is an unofficial fan-made tool and is not affiliated with Nintendo, The Pokémon Company, or Game Freak.
 
-To build the application:
-
-```bash
-pyinstaller PokemonShinyScanner.spec
-```
-
-The resulting Windows application is intended to be distributed with its required assets and dependencies.
-
-## Contributing
-
-Suggestions, bug reports, and contributions are welcome.
-
-If you encounter an issue, please provide:
-
-- A description of the issue.
-- Steps to reproduce it.
-- Relevant error messages or screenshots.
-- Your VisualBoyAdvance version.
-
-## License
-
-The project's source code is distributed under the MIT License. See [LICENSE](LICENSE) for details.
-
-Pokémon and all related names, characters, and assets are trademarks and copyrights of their respective owners. This project is an unofficial fan-made tool and is not affiliated with, endorsed by, or associated with Nintendo, The Pokémon Company, or Game Freak.
-
-Pokémon game data and sprite assets retain their respective ownership and licensing considerations.
+The application source code is distributed under the MIT License. See [LICENSE](LICENSE).

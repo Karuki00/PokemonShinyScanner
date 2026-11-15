@@ -3,6 +3,10 @@
 __pycache__/
 *.py[cod]
 *.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
 
 # Virtual environments
 venv/
@@ -21,6 +25,8 @@ dist/
 *.log
 *.tmp
 *.bak
+*.swp
+*.swo
 
 # Local configuration
 .env
@@ -36,3 +42,8 @@ test/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Local tooling / generated reports
+.coverage
+coverage.xml
+htmlcov/
