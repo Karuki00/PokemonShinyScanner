@@ -47,3 +47,6 @@ Thumbs.db
 .coverage
 coverage.xml
 htmlcov/
+
+# Tauri updater signing material (never commit private keys)
+.updater/

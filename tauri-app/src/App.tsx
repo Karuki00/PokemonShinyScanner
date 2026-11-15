@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { relaunch } from "@tauri-apps/plugin-process";
+import { check, type Update } from "@tauri-apps/plugin-updater";
 import "./App.css";
 import pcBoxBackground from "./assets/pc_box/background-pc.png";
 import buttonSoundUrl from "./assets/sound_effects/button.mp3";
@@ -67,6 +69,7 @@ interface HuntStorage {
 const STORAGE_KEY = "emerald-iv-scanner-hunts";
 const BOX_THEME_STORAGE_KEY = "emerald-iv-scanner-box-theme";
 const GAME_STORAGE_KEY = "pokemon-shiny-scanner-game";
+const APP_VERSION = "0.2.0";
 
 type GameId = "emerald" | "ruby" | "sapphire" | "firered" | "leafgreen";
 type RegionId = "hoenn" | "kanto";
@@ -738,6 +741,12 @@ function App() {
   const [showFirstLaunch, setShowFirstLaunch] = useState(
     () => !localStorage.getItem(GAME_STORAGE_KEY),
   );
+  const [availableUpdate, setAvailableUpdate] = useState<Update | null>(null);
+  const [updateState, setUpdateState] = useState<
+    "checking" | "available" | "up-to-date" | "offline" | "installing"
+  >("checking");
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState(0);
   const [resetMode, setResetMode] = useState<HuntMode | null>(null);
   const pageRef = useRef<Page>(page);
 
@@ -767,6 +776,14 @@ function App() {
   useEffect(() => {
     localStorage.setItem(GAME_STORAGE_KEY, selectedGame);
   }, [selectedGame]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void checkForUpdates();
+    }, 1200);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const preventAppReload = (event: KeyboardEvent) => {
@@ -900,6 +917,54 @@ function App() {
     } catch (err) {
       scanningRef.current = true;
       setError(String(err));
+    }
+  }
+
+  async function checkForUpdates() {
+    if (updateState === "checking" || updateState === "installing") return;
+
+    setUpdateState("checking");
+
+    try {
+      const update = await check({ timeout: 5000 });
+
+      if (update) {
+        setAvailableUpdate(update);
+        setUpdateState("available");
+        setShowUpdateModal(true);
+      } else {
+        setUpdateState("up-to-date");
+      }
+    } catch {
+      setUpdateState("offline");
+    }
+  }
+
+  async function dismissUpdate() {
+    await availableUpdate?.close().catch(() => undefined);
+    setAvailableUpdate(null);
+    setShowUpdateModal(false);
+  }
+
+  async function installUpdate() {
+    if (!availableUpdate) return;
+
+    setUpdateState("installing");
+    setUpdateProgress(0);
+
+    try {
+      await availableUpdate.downloadAndInstall((event) => {
+        if (event.event === "Progress") {
+          setUpdateProgress((progress) => Math.min(99, progress + 1));
+        } else if (event.event === "Finished") {
+          setUpdateProgress(100);
+        }
+      });
+
+      await relaunch();
+    } catch (updateError) {
+      setUpdateState("available");
+      setError(`Update failed: ${String(updateError)}`);
     }
   }
 
@@ -1287,7 +1352,24 @@ function App() {
 
       <footer className="app-footer">
         <span>POKÉMON SHINY SCANNER</span>
-        <span>GEN III MEMORY READER · TAURI + RUST</span>
+        <div className="app-footer-update">
+          <span>v{APP_VERSION}</span>
+          <button
+            className={`update-status update-status-${updateState}`}
+            disabled={updateState === "checking" || updateState === "installing"}
+            onClick={() =>
+              updateState === "available"
+                ? setShowUpdateModal(true)
+                : void checkForUpdates()
+            }
+          >
+            {updateState === "checking" && "Checking for updates…"}
+            {updateState === "available" && "Update available"}
+            {updateState === "up-to-date" && "Up to date · Check again"}
+            {updateState === "offline" && "Offline · Check for updates"}
+            {updateState === "installing" && `Installing… ${updateProgress}%`}
+          </button>
+        </div>
       </footer>
 
       {pageTransitioning && (
@@ -1319,6 +1401,31 @@ function App() {
                 onClick={() => resetHuntCounter(resetMode)}
               >
                 Reset Counter
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {showUpdateModal && availableUpdate && (
+        <div className="modal-backdrop">
+          <section className="confirm-modal update-modal">
+            <div className="modal-icon">↟</div>
+            <span className="eyebrow">SOFTWARE UPDATE</span>
+            <h2>Version {availableUpdate.version} is ready</h2>
+            <p>
+              You are running v{APP_VERSION}. Review the release notes before
+              downloading the signed update.
+            </p>
+            <div className="update-notes">
+              {availableUpdate.body || "Release notes were not provided."}
+            </div>
+            <div className="modal-actions">
+              <button className="secondary-button" onClick={() => void dismissUpdate()}>
+                Later
+              </button>
+              <button className="primary-button" onClick={() => void installUpdate()}>
+                Download and Install
               </button>
             </div>
           </section>

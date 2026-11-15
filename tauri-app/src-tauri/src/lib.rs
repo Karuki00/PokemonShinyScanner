@@ -15,6 +15,8 @@ use scanner::party_scanner::{ScannerState, start_scanner, stop_scanner};
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         // Keep scanner state available to Tauri commands.
         .manage(ScannerState::default())
         .setup(|app| {

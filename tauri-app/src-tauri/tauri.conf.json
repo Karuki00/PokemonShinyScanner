@@ -25,6 +25,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": "all",
     "icon": [
       "icons/32x32.png",
@@ -35,6 +36,15 @@
     ],
     "android": {
       "debugApplicationIdSuffix": ".debug"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQyQTU3RTRGRjVBMURBNDEKUldSQjJxSDFUMzZsMHN1NERsWGJKTjFNQjVXNXdzQldubnQ2M3A5N3ozcFQxbk1NSnlhZ0U0U2oK",
+      "endpoints": [
+        "https://github.com/Karuki00/PokemonShinyScanner/releases/latest/download/latest.json"
+      ],
+      "requireSignedVersion": true
     }
   }
 }

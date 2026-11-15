@@ -1494,6 +1494,52 @@ button.party-card {
   letter-spacing: 1.5px;
 }
 
+.app-footer-update {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.update-status {
+  padding: 6px 10px;
+  border: 1px solid #315440;
+  border-radius: 7px;
+  color: #8fa99a;
+  background: #102019aa;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  transition: border-color 180ms ease, color 180ms ease, background 180ms ease;
+}
+
+.update-status:not(:disabled):hover,
+.update-status-available {
+  border-color: var(--theme-accent);
+  color: #dff7e6;
+  background: #173a26;
+}
+
+.update-status-offline {
+  color: #74877b;
+}
+
+.update-modal {
+  width: min(520px, 100%);
+}
+
+.update-notes {
+  max-height: 180px;
+  margin: 18px 0 4px;
+  padding: 14px;
+  overflow: auto;
+  border: 1px solid #2d4938;
+  border-radius: 9px;
+  color: #b5c9ba;
+  background: #0a1810aa;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
 /* ========================================
    RESPONSIVE: TABLET
 ======================================== */
