@@ -161,7 +161,7 @@ PokemonShinyScanner/
 - [x] Encounter counter and statistics
 - [ ] Further UI refinement
 - [ ] Improved validation and error handling
-- [ ] Public Windows release
+- [x] Public Windows release
 
 ## Building
 
