@@ -36,6 +36,23 @@ jobs:
         working-directory: tauri-app
         run: pnpm install --frozen-lockfile
 
+      - name: Prepare release notes
+        id: release_notes
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          $content = Get-Content -Raw CHANGELOG.md
+          $pattern = "(?ms)^##\s+$([regex]::Escape($version)).*?(?=^##\s+|\z)"
+          $match = [regex]::Match($content, $pattern)
+          if (-not $match.Success) {
+            throw "No changelog section found for $version"
+          }
+
+          $notes = $match.Value.Trim()
+          "body<<RELEASE_NOTES" >> $env:GITHUB_OUTPUT
+          $notes >> $env:GITHUB_OUTPUT
+          "RELEASE_NOTES" >> $env:GITHUB_OUTPUT
+
       - name: Build and publish release
         uses: tauri-apps/tauri-action@v1
         env:
@@ -46,9 +63,7 @@ jobs:
           projectPath: tauri-app
           tagName: ${{ github.ref_name }}
           releaseName: Pokémon Shiny Scanner ${{ github.ref_name }}
-          releaseBody: |
-            See the generated release notes below for changes in this version.
-            Download the Windows installer from the assets section.
-          generateReleaseNotes: true
+          releaseBody: ${{ steps.release_notes.outputs.body }}
+          generateReleaseNotes: false
           releaseDraft: false
           prerelease: false
