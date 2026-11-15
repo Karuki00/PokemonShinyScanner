@@ -96,7 +96,7 @@ PokemonShinyScanner/
 - [x] Hoenn region picker and Emerald/Ruby/Sapphire profiles.
 - [x] Kanto region picker and FireRed profile.
 - [x] LeafGreen profile using the shared US Kanto layout.
-- [ ] Validate LeafGreen with a live party and wild encounter.
+- [x] Validate LeafGreen with a live party and wild encounter.
 - [ ] Add ROM revision/language profile detection.
 - [ ] Add Generation I/II Game Boy Color scanner support.
 - [ ] Add automated Windows release builds and checksums.
