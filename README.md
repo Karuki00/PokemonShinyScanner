@@ -15,7 +15,7 @@ An offline Windows companion app for inspecting Generation III Pokémon data and
 | Hoenn | Pokémon Sapphire | III | Supported and live validated |
 | Kanto | Pokémon FireRed | III | Supported and live validated |
 | Kanto | Pokémon LeafGreen | III | Implemented with the shared US Kanto profile; validate against your ROM revision |
-| — | Pokémon Gold / Silver / Crystal | II | Planned |
+| Johto | Pokémon Gold / Silver / Crystal | II | Planned |
 
 The first launch presents a region picker for Hoenn or Kanto. The active region can be changed later with **Change Region** in the sidebar. The scanner remembers the selected game locally, but all Pokémon data, sprites, and sound effects are bundled into the application so the Tauri build works offline.
 
