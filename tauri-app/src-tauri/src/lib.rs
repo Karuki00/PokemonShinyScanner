@@ -10,11 +10,13 @@ pub mod games;
 #[path = "scanner/mods.rs"]
 pub mod scanner;
 
-use scanner::party_scanner::{ScannerState, start_scanner, stop_scanner};
-
+use scanner::party_scanner::{
+    ScannerState, press_emulator_a, send_emulator_key, send_emulator_turn,
+    set_battle_ui_diagnostic, start_scanner, stop_scanner,
+};
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         // Keep scanner state available to Tauri commands.
@@ -29,9 +31,30 @@ pub fn run() {
             }
 
             Ok(())
-        })
-        // Commands callable from the React frontend.
-        .invoke_handler(tauri::generate_handler![start_scanner, stop_scanner,])
-        .run(tauri::generate_context!())
-        .expect("error while building tauri application");
+        });
+
+    if cfg!(debug_assertions) {
+        builder
+            .invoke_handler(tauri::generate_handler![
+                start_scanner,
+                stop_scanner,
+                press_emulator_a,
+                send_emulator_key,
+                send_emulator_turn,
+                set_battle_ui_diagnostic,
+            ])
+            .run(tauri::generate_context!())
+            .expect("error while building tauri development application");
+    } else {
+        builder
+            .invoke_handler(tauri::generate_handler![
+                start_scanner,
+                stop_scanner,
+                press_emulator_a,
+                send_emulator_key,
+                send_emulator_turn,
+            ])
+            .run(tauri::generate_context!())
+            .expect("error while building tauri application");
+    }
 }

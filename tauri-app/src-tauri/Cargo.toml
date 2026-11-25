@@ -1,6 +1,6 @@
 [package]
 name = "pokemon-shiny-scanner"
-version = "0.2.0"
+version = "0.3.0"
 description = "Offline Gen III Pokémon party and shiny scanner"
 authors = ["Karuki00"]
 license = "MIT"
@@ -33,6 +33,7 @@ windows-sys = { version = "0.61.2", features = [
     "Win32_UI_WindowsAndMessaging"
 ] }
 tauri-plugin-process = "2"
+enigo = "0.6.1"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2"

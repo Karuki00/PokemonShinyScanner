@@ -1,5 +1,43 @@
 # Changelog
 
+## Pokemon Shiny Scanner v0.3.0
+
+### Automatic Hunting and PC Storage Release
+
+This release adds automatic wild shiny hunting and live PC storage scanning,
+along with party EV tracking and a redesigned interface.
+
+### Features
+
+- Automatic wild hunts for US Pokemon Emerald. The scanner moves in the overworld,
+  recognizes battle transitions, runs from non-shiny encounters, and stops on a
+  shiny encounter.
+- Automatic wild capture flow with post-capture prompts handled and a stop when
+  no Pokeballs remain.
+- Starter shiny hunting with configurable starter selection and soft-reset
+  tracking.
+- Live read-only scanning of all 14 PC boxes, with Pokemon details and box
+  wallpaper selection.
+- EV gain tracking for Pokemon in the party.
+- PC storage box wallpaper picker with 24 bundled wallpapers.
+- Production builds omit the development-only battle diagnostic controls.
+- Updated interface, navigation, responsive layouts, and text rendering.
+- More reliable Generation III storage decoding and emulator input handling.
+
+### Requirements
+
+- Windows 10 / Windows 11.
+- VisualBoyAdvance 1.8 Beta 3 or a compatible VBA build.
+- A legally obtained Generation III Pokemon ROM.
+
+### Compatibility
+
+Targets the US VisualBoyAdvance memory layouts for Pokemon Emerald, Ruby,
+Sapphire, FireRed, and LeafGreen. Automatic wild hunting is currently enabled
+for the US Emerald profile.
+
+---
+
 ## Pokémon Shiny Scanner v0.2.0
 
 ### Gen III Region Migration Release

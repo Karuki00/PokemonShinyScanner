@@ -1,0 +1,158 @@
+{
+  "source": "background-pc.png",
+  "layout": {
+    "columns": 4,
+    "rows": 6,
+    "indexing": "zero-based row-major"
+  },
+  "wallpaper_size_px": [
+    154,
+    114
+  ],
+  "wallpapers": [
+    {
+      "index": 0,
+      "filename": "wallpaper_00.png",
+      "row": 0,
+      "column": 0
+    },
+    {
+      "index": 1,
+      "filename": "wallpaper_01.png",
+      "row": 0,
+      "column": 1
+    },
+    {
+      "index": 2,
+      "filename": "wallpaper_02.png",
+      "row": 0,
+      "column": 2
+    },
+    {
+      "index": 3,
+      "filename": "wallpaper_03.png",
+      "row": 0,
+      "column": 3
+    },
+    {
+      "index": 4,
+      "filename": "wallpaper_04.png",
+      "row": 1,
+      "column": 0
+    },
+    {
+      "index": 5,
+      "filename": "wallpaper_05.png",
+      "row": 1,
+      "column": 1
+    },
+    {
+      "index": 6,
+      "filename": "wallpaper_06.png",
+      "row": 1,
+      "column": 2
+    },
+    {
+      "index": 7,
+      "filename": "wallpaper_07.png",
+      "row": 1,
+      "column": 3
+    },
+    {
+      "index": 8,
+      "filename": "wallpaper_08.png",
+      "row": 2,
+      "column": 0
+    },
+    {
+      "index": 9,
+      "filename": "wallpaper_09.png",
+      "row": 2,
+      "column": 1
+    },
+    {
+      "index": 10,
+      "filename": "wallpaper_10.png",
+      "row": 2,
+      "column": 2
+    },
+    {
+      "index": 11,
+      "filename": "wallpaper_11.png",
+      "row": 2,
+      "column": 3
+    },
+    {
+      "index": 12,
+      "filename": "wallpaper_12.png",
+      "row": 3,
+      "column": 0
+    },
+    {
+      "index": 13,
+      "filename": "wallpaper_13.png",
+      "row": 3,
+      "column": 1
+    },
+    {
+      "index": 14,
+      "filename": "wallpaper_14.png",
+      "row": 3,
+      "column": 2
+    },
+    {
+      "index": 15,
+      "filename": "wallpaper_15.png",
+      "row": 3,
+      "column": 3
+    },
+    {
+      "index": 16,
+      "filename": "wallpaper_16.png",
+      "row": 4,
+      "column": 0
+    },
+    {
+      "index": 17,
+      "filename": "wallpaper_17.png",
+      "row": 4,
+      "column": 1
+    },
+    {
+      "index": 18,
+      "filename": "wallpaper_18.png",
+      "row": 4,
+      "column": 2
+    },
+    {
+      "index": 19,
+      "filename": "wallpaper_19.png",
+      "row": 4,
+      "column": 3
+    },
+    {
+      "index": 20,
+      "filename": "wallpaper_20.png",
+      "row": 5,
+      "column": 0
+    },
+    {
+      "index": 21,
+      "filename": "wallpaper_21.png",
+      "row": 5,
+      "column": 1
+    },
+    {
+      "index": 22,
+      "filename": "wallpaper_22.png",
+      "row": 5,
+      "column": 2
+    },
+    {
+      "index": 23,
+      "filename": "wallpaper_23.png",
+      "row": 5,
+      "column": 3
+    }
+  ]
+}

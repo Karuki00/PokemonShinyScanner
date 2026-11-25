@@ -2,7 +2,7 @@
 
 An offline Windows companion app for inspecting Generation III Pokémon data and tracking shiny hunts in VisualBoyAdvance. The project began as a Python/PySide6 application and is migrating to a Tauri + Rust desktop app.
 
-**Current release:** `0.2.0` — Gen III region migration milestone
+**Current release:** `0.3.0` — Automatic Hunting and PC Storage Release
 
 **Repository:** [Karuki00/PokemonShinyScanner](https://github.com/Karuki00/PokemonShinyScanner)
 
@@ -25,6 +25,8 @@ Compatibility depends on the ROM language/revision and emulator memory layout. T
 
 - Live party monitoring with species, nature, ability, shiny status, PID/OTID, checksum, and IVs.
 - Wild encounter detection and encounter counters.
+- Wild Battle UI diagnostics and sample export are available only in development builds. Production builds show a single automatic wild hunt control and do not register the diagnostic capture/export commands.
+- Automatic wild hunting is enabled for the US Emerald memory profile. It starts the scanner if needed, moves only while `gMain.inBattle` is clear, acknowledges wild intro text once, waits for the action menu to remain ready for two scans, and selects Run for non-shiny encounters. It acknowledges the detected `Got away safely!` text once, then waits for the overworld before moving again; shiny encounters stop the hunt.
 - Starter soft-reset tracking with `Ctrl + R` while VisualBoyAdvance is focused.
 - Hoenn and Kanto region/game selection.
 - Theme-aware Pokémon summary panels with bundled sprites and sound effects.

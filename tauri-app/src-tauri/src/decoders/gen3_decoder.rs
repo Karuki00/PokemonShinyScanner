@@ -9,6 +9,16 @@ pub struct Ivs {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Evs {
+    pub hp: u8,
+    pub attack: u8,
+    pub defense: u8,
+    pub speed: u8,
+    pub special_attack: u8,
+    pub special_defense: u8,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PokemonData {
     pub pid: u32,
     pub otid: u32,
@@ -18,6 +28,7 @@ pub struct PokemonData {
 
     pub species: u16,
     pub nature_id: u8,
+    pub shiny_value: u16,
     pub shiny: bool,
     pub ability_number: u8,
 
@@ -26,6 +37,7 @@ pub struct PokemonData {
     pub calculated_checksum: u16,
 
     pub ivs: Ivs,
+    pub evs: Evs,
 }
 
 // Generation III substructure permutations.
@@ -126,7 +138,7 @@ pub fn decode_pokemon(data: &[u8]) -> Result<PokemonData, String> {
 
     let growth = &blocks[0];
     let _attacks = &blocks[1];
-    let _evs = &blocks[2];
+    let ev_data = &blocks[2];
     let misc = &blocks[3];
 
     // --------------------------------------------------------
@@ -169,6 +181,15 @@ pub fn decode_pokemon(data: &[u8]) -> Result<PokemonData, String> {
         special_defense: ((iv_data >> 25) & 0x1F) as u8,
     };
 
+    let evs = Evs {
+        hp: ev_data[0],
+        attack: ev_data[1],
+        defense: ev_data[2],
+        speed: ev_data[3],
+        special_attack: ev_data[4],
+        special_defense: ev_data[5],
+    };
+
     // --------------------------------------------------------
     // Nature
     // --------------------------------------------------------
@@ -200,12 +221,14 @@ pub fn decode_pokemon(data: &[u8]) -> Result<PokemonData, String> {
         secret_id,
         species,
         nature_id,
+        shiny_value,
         shiny,
         ability_number,
         checksum_valid,
         stored_checksum,
         calculated_checksum,
         ivs,
+        evs,
     })
 }
 

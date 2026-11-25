@@ -50,3 +50,6 @@ htmlcov/
 
 # Tauri updater signing material (never commit private keys)
 .updater/
+
+# Private local project milestones
+MILESTONES.md
