@@ -234,7 +234,7 @@ const STORAGE_KEY = "emerald-iv-scanner-hunts";
 const HUNT_POKEMON_CACHE_KEY = "emerald-iv-scanner-latest-hunt-pokemon";
 const BOX_THEME_STORAGE_KEY = "emerald-iv-scanner-box-theme";
 const GAME_STORAGE_KEY = "pokemon-shiny-scanner-game";
-const APP_VERSION = "0.3.3";
+const APP_VERSION = "0.3.4";
 const UPDATE_CHECK_INTERVAL_MS = 15 * 60 * 1000;
 const RELEASES_URL = "https://github.com/Karuki00/PokemonShinyScanner/releases/tag";
 

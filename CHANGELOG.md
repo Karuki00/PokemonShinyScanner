@@ -1,5 +1,13 @@
 # Changelog
 
+## Pokemon Shiny Scanner v0.3.4
+
+### Sticky Footer Release
+
+- Keeps the footer visible while scrolling so the app version and updater status remain accessible.
+
+---
+
 ## Pokemon Shiny Scanner v0.3.3
 
 ### Runtime Cleanup Release

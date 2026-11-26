@@ -83,8 +83,7 @@ button:disabled {
   pointer-events: none;
 }
 
-.app-shell > .app-layout,
-.app-shell > footer {
+.app-shell > .app-layout {
   position: relative;
   z-index: 1;
 }
@@ -1562,6 +1561,9 @@ button.party-card {
 ======================================== */
 
 .app-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
   min-height: 60px;
   flex-shrink: 0;
   padding: 15px 28px;
@@ -1570,6 +1572,7 @@ button.party-card {
   justify-content: space-between;
   gap: 15px;
   border-top: 1px solid #263c30;
+  background: #081520f2;
   color: #6f8878;
   font-size: 9px;
   letter-spacing: 1.5px;
