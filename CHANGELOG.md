@@ -1,5 +1,15 @@
 # Changelog
 
+## Pokemon Shiny Scanner v0.3.1
+
+### Updater Improvements
+
+- Periodically checks for updates in the background and when the app regains focus.
+- Prompts users when a new release is available.
+- Adds a link to the full GitHub release notes in the update dialog.
+
+---
+
 ## Pokemon Shiny Scanner v0.3.0
 
 ### Automatic Hunting and PC Storage Release

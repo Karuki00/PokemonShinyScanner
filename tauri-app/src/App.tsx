@@ -202,7 +202,9 @@ const STORAGE_KEY = "emerald-iv-scanner-hunts";
 const HUNT_POKEMON_CACHE_KEY = "emerald-iv-scanner-latest-hunt-pokemon";
 const BOX_THEME_STORAGE_KEY = "emerald-iv-scanner-box-theme";
 const GAME_STORAGE_KEY = "pokemon-shiny-scanner-game";
-const APP_VERSION = "0.3.0";
+const APP_VERSION = "0.3.1";
+const UPDATE_CHECK_INTERVAL_MS = 15 * 60 * 1000;
+const RELEASES_URL = "https://github.com/Karuki00/PokemonShinyScanner/releases/tag";
 
 type GameId = "emerald" | "ruby" | "sapphire" | "firered" | "leafgreen";
 type RegionId = "hoenn" | "kanto";
@@ -1348,6 +1350,8 @@ function App() {
   >("checking");
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updateProgress, setUpdateProgress] = useState(0);
+  const dismissedUpdateVersionRef = useRef<string | null>(null);
+  const updateCheckInFlightRef = useRef(false);
   const [resetMode, setResetMode] = useState<HuntMode | null>(null);
   const pageRef = useRef<Page>(page);
 
@@ -1402,11 +1406,22 @@ function App() {
   }, [selectedGame]);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const checkOnStartup = window.setTimeout(() => {
       void checkForUpdates();
     }, 1200);
+    const checkPeriodically = window.setInterval(() => {
+      void checkForUpdates();
+    }, UPDATE_CHECK_INTERVAL_MS);
+    const checkWhenFocused = () => void checkForUpdates();
+    window.addEventListener("focus", checkWhenFocused);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(checkOnStartup);
+      window.clearInterval(checkPeriodically);
+      window.removeEventListener("focus", checkWhenFocused);
+    };
+    // checkForUpdates is intentionally invoked by startup, focus, and interval events.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -2500,8 +2515,9 @@ function App() {
   }
 
   async function checkForUpdates() {
-    if (updateState === "checking" || updateState === "installing") return;
+    if (updateCheckInFlightRef.current || updateState === "installing") return;
 
+    updateCheckInFlightRef.current = true;
     setUpdateState("checking");
 
     try {
@@ -2510,16 +2526,23 @@ function App() {
       if (update) {
         setAvailableUpdate(update);
         setUpdateState("available");
-        setShowUpdateModal(true);
+        if (dismissedUpdateVersionRef.current !== update.version) {
+          setShowUpdateModal(true);
+        }
       } else {
         setUpdateState("up-to-date");
       }
     } catch {
       setUpdateState("offline");
+    } finally {
+      updateCheckInFlightRef.current = false;
     }
   }
 
   async function dismissUpdate() {
+    if (availableUpdate) {
+      dismissedUpdateVersionRef.current = availableUpdate.version;
+    }
     await availableUpdate?.close().catch(() => undefined);
     setAvailableUpdate(null);
     setShowUpdateModal(false);
@@ -3298,6 +3321,14 @@ function App() {
             <div className="update-notes">
               {availableUpdate.body || "Release notes were not provided."}
             </div>
+            <a
+              className="update-release-link"
+              href={`${RELEASES_URL}/v${encodeURIComponent(availableUpdate.version)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View full release notes on GitHub
+            </a>
             <div className="modal-actions">
               <button className="secondary-button" onClick={() => void dismissUpdate()}>
                 Later

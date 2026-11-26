@@ -280,6 +280,9 @@ button:disabled {
 }
 
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   height: 76px;
   flex-shrink: 0;
   padding: 0 32px;
@@ -288,7 +291,8 @@ button:disabled {
   justify-content: space-between;
   gap: 20px;
   border-bottom: 1px solid #263c30;
-  background: rgba(9, 21, 15, 0.94);
+  background: #09150f;
+  isolation: isolate;
 }
 
 .brand {
@@ -1621,6 +1625,19 @@ button.party-card {
   white-space: pre-wrap;
 }
 
+.update-release-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.update-release-link:hover {
+  text-decoration: underline;
+}
+
 /* ========================================
    RESPONSIVE: TABLET
 ======================================== */
@@ -2395,7 +2412,7 @@ button.party-card {
 }
 
 .topbar {
-  background: rgba(9, 21, 15, 0.78);
+  background: #09150f;
 }
 
 .sidebar {
@@ -3815,7 +3832,7 @@ button.pc-storage-slot:hover { z-index: 1; transform: translateY(-2px); border-c
   .pokemon-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 780px) {
-  .topbar { position: sticky; top: 0; z-index: 10; height: auto; min-height: 74px; flex-wrap: wrap; gap: 10px 16px; padding: 12px 17px; }
+  .topbar { height: auto; min-height: 74px; flex-wrap: wrap; gap: 10px 16px; padding: 12px 17px; }
   .brand { flex: 1 1 210px; }
   .connection-pill { order: 2; }
   .game-selector-control { order: 3; flex: 1 1 190px; }
