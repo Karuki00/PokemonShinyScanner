@@ -1387,6 +1387,7 @@ function App() {
   const [updateState, setUpdateState] = useState<
     "checking" | "available" | "up-to-date" | "offline" | "installing"
   >("checking");
+  const [updateError, setUpdateError] = useState<string | null>(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updateProgress, setUpdateProgress] = useState(0);
   const dismissedUpdateVersionRef = useRef<string | null>(null);
@@ -2579,9 +2580,18 @@ function App() {
 
     updateCheckInFlightRef.current = true;
     setUpdateState("checking");
+    setUpdateError(null);
 
     try {
-      const update = await check({ timeout: 5000 });
+      const update = await Promise.race([
+        check({ timeout: 5000 }),
+        new Promise<never>((_, reject) => {
+          window.setTimeout(
+            () => reject(new Error("Update check timed out after 8 seconds.")),
+            8000,
+          );
+        }),
+      ]);
 
       if (update) {
         setAvailableUpdate(update);
@@ -2592,7 +2602,11 @@ function App() {
       } else {
         setUpdateState("up-to-date");
       }
-    } catch {
+    } catch (updateCheckError) {
+      const message = updateCheckError instanceof Error
+        ? updateCheckError.message
+        : "Could not reach the update service.";
+      setUpdateError(message);
       setUpdateState("offline");
     } finally {
       updateCheckInFlightRef.current = false;
@@ -3301,6 +3315,7 @@ function App() {
           <span>v{APP_VERSION}</span>
           <button
             className={`update-status update-status-${updateState}`}
+            title={updateError ?? undefined}
             disabled={updateState === "checking" || updateState === "installing"}
             onClick={() =>
               updateState === "available"
@@ -3311,7 +3326,7 @@ function App() {
             {updateState === "checking" && "Checking for updates…"}
             {updateState === "available" && "Update available"}
             {updateState === "up-to-date" && "Up to date · Check again"}
-            {updateState === "offline" && "Offline · Check for updates"}
+            {updateState === "offline" && "Update check failed · Retry"}
             {updateState === "installing" && `Installing… ${updateProgress}%`}
           </button>
         </div>
