@@ -7,6 +7,9 @@
 - Periodically checks for updates in the background and when the app regains focus.
 - Prompts users when a new release is available.
 - Adds a link to the full GitHub release notes in the update dialog.
+- Adds EV-training helpers showing Pokémon and EV yields for each stat.
+- Saves per-Pokémon EV goals in the app's SQLite database across restarts.
+- Keeps the application title bar sticky while scrolling.
 
 ---
 

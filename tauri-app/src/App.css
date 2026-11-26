@@ -3683,6 +3683,10 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 .ev-to-go { color: #79988d; font-size: 7px; letter-spacing: 0; text-transform: none; }
 .ev-stat-meter { grid-column: 1 / -1; height: 5px; overflow: hidden; border-radius: 6px; background: #18323e; }
 .ev-stat-meter span { display: block; height: 100%; border-radius: inherit; background: var(--ev-color); box-shadow: 0 0 10px color-mix(in srgb, var(--ev-color) 55%, transparent); transition: width .35s ease; }
+.ev-training-tip { display: flex; grid-column: 1 / -1; flex-wrap: wrap; align-items: center; gap: 5px 8px; color: #6c8c99; font-size: 7px; letter-spacing: .6px; }
+.ev-training-tip > span { color: var(--ev-color); font-weight: 800; letter-spacing: 1px; }
+.ev-training-tip strong { color: #b8d2d5; font-size: 8px; letter-spacing: 0; }
+.ev-training-tip small { color: #617d88; font-size: 7px; letter-spacing: 0; }
 .ev-stat-hp { --ev-color: #ee6f7d; }
 .ev-stat-attack { --ev-color: #ed985d; }
 .ev-stat-defense { --ev-color: #eacb70; }

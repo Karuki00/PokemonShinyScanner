@@ -177,6 +177,38 @@ const EV_STATS: { id: EvStat; label: string }[] = [
   { id: "specialDefense", label: "Sp. Defense" },
   { id: "speed", label: "Speed" },
 ];
+const EV_TRAINING_GUIDES: Record<EvStat, { pokemon: string; yield: number }[]> = {
+  hp: [
+    { pokemon: "Marill", yield: 2 },
+    { pokemon: "Azurill", yield: 1 },
+    { pokemon: "Wailmer", yield: 2 },
+  ],
+  attack: [
+    { pokemon: "Poochyena", yield: 1 },
+    { pokemon: "Mightyena", yield: 2 },
+    { pokemon: "Shuppet", yield: 2 },
+  ],
+  defense: [
+    { pokemon: "Geodude", yield: 1 },
+    { pokemon: "Aron", yield: 1 },
+    { pokemon: "Graveler", yield: 2 },
+  ],
+  specialAttack: [
+    { pokemon: "Ralts", yield: 1 },
+    { pokemon: "Numel", yield: 1 },
+    { pokemon: "Roselia", yield: 2 },
+  ],
+  specialDefense: [
+    { pokemon: "Tentacool", yield: 1 },
+    { pokemon: "Tentacruel", yield: 2 },
+    { pokemon: "Dustox", yield: 3 },
+  ],
+  speed: [
+    { pokemon: "Wingull", yield: 1 },
+    { pokemon: "Zigzagoon", yield: 1 },
+    { pokemon: "Zubat", yield: 1 },
+  ],
+};
 const EMPTY_EV_VALUES: EvValues = {
   hp: 0,
   attack: 0,
@@ -971,6 +1003,13 @@ function EvTrainingSummary({
             <div className="ev-stat-meter" aria-label={`${label}: ${evs[id]} of 255 EVs`}>
               <span style={{ width: `${Math.min(100, (evs[id] / 255) * 100)}%` }} />
             </div>
+            <div className="ev-training-tip">
+              <span>TRAIN WITH</span>
+              {EV_TRAINING_GUIDES[id].map(({ pokemon, yield: evYield }) => (
+                <strong key={pokemon}>{pokemon} +{evYield}</strong>
+              ))}
+              <small>EV{EV_TRAINING_GUIDES[id].some(({ yield: evYield }) => evYield > 1) ? "s" : ""} per defeat</small>
+            </div>
           </div>
         ))}
       </div>
@@ -1352,6 +1391,7 @@ function App() {
   const [updateProgress, setUpdateProgress] = useState(0);
   const dismissedUpdateVersionRef = useRef<string | null>(null);
   const updateCheckInFlightRef = useRef(false);
+  const evTracksHydratedRef = useRef(false);
   const [resetMode, setResetMode] = useState<HuntMode | null>(null);
   const pageRef = useRef<Page>(page);
 
@@ -1387,7 +1427,27 @@ function App() {
   }, [hunts]);
 
   useEffect(() => {
+    let active = true;
+    void invoke<EvTrackStorage>("load_ev_targets")
+      .then((stored) => {
+        if (!active) return;
+        setEvTracks((current) => ({ ...current, ...stored }));
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        evTracksHydratedRef.current = true;
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem(EV_STORAGE_KEY, JSON.stringify(evTracks));
+    if (evTracksHydratedRef.current) {
+      void invoke("save_ev_targets", { targets: evTracks }).catch(() => undefined);
+    }
   }, [evTracks]);
 
   useEffect(() => {
