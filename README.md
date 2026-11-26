@@ -2,7 +2,7 @@
 
 An offline Windows companion app for inspecting Generation III Pokémon data and tracking shiny hunts in VisualBoyAdvance. The project began as a Python/PySide6 application and is migrating to a Tauri + Rust desktop app.
 
-**Current release:** `0.3.2` — Updater Improvements
+**Current release:** `0.3.3` — Runtime Cleanup and Sticky Header
 
 **Repository:** [Karuki00/PokemonShinyScanner](https://github.com/Karuki00/PokemonShinyScanner)
 

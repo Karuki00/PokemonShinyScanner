@@ -1,5 +1,14 @@
 # Changelog
 
+## Pokemon Shiny Scanner v0.3.3
+
+### Runtime Cleanup Release
+
+- Removes terminal debug logging from the desktop application.
+- Fixes the sticky topbar CSS cascade and removes conflicting topbar overrides.
+
+---
+
 ## Pokemon Shiny Scanner v0.3.2
 
 ### Updater Feedback Release
