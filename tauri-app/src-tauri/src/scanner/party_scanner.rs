@@ -27,8 +27,8 @@ use crate::{
     games::gen3::{
         pokemon_data::{ability_name, nature_name, species_info},
         profile::{
-            Gen3Game, Gen3MemoryProfile, POKEMON_SIZE, is_trainer_battle, party_addresses,
-            read_battle_type_flags, read_party, read_wild_candidate, verified_profile,
+            Gen3Game, Gen3MemoryProfile, POKEMON_SIZE, is_trainer_battle, read_battle_type_flags,
+            read_party, read_wild_candidate, verified_profile,
         },
     },
     memory::{
@@ -101,8 +101,6 @@ const EMERALD_STARTER_MOVE_TASK: u32 = 0x0813_4640;
 const EMERALD_STARTER_CREATE_LABEL_TASK: u32 = 0x0813_4668;
 const EMERALD_TASK_SIZE: usize = 0x28;
 const EMERALD_TASK_COUNT: usize = 16;
-static EMERALD_DEX_DIAGNOSTIC_LOGGED: AtomicBool = AtomicBool::new(false);
-static EMERALD_B_INPUT_DIAGNOSTIC_LOGGED: AtomicBool = AtomicBool::new(false);
 static EMERALD_CAPTURE_TRACE_LAST_STAGE: std::sync::atomic::AtomicU8 =
     std::sync::atomic::AtomicU8::new(0);
 static EMERALD_CAPTURE_TRACE_COUNT: std::sync::atomic::AtomicU8 =
@@ -363,14 +361,6 @@ pub fn send_emulator_key(
         return Ok("Skipped A: Emerald is already in the starter chooser.".to_string());
     }
     let acknowledged = send_vba_key(virtual_key, control, &game)?;
-    if key == "b"
-        && game.eq_ignore_ascii_case("emerald")
-        && !EMERALD_B_INPUT_DIAGNOSTIC_LOGGED.swap(true, Ordering::Relaxed)
-    {
-        log::warn!(
-            "Wild capture diagnostic: sent VBA B binding X; gMain key-memory acknowledgment={acknowledged}."
-        );
-    }
     if game.eq_ignore_ascii_case("emerald") && !control {
         Ok(format!(
             "Sent {label}; {}",
@@ -567,7 +557,6 @@ impl PartyUpdate {
 struct ScanSnapshot {
     party: PartyUpdate,
     pc_storage: PcStorageUpdate,
-    pc_storage_address: Option<usize>,
     pc_storage_diagnostic: Option<String>,
     battle_type_flags: u32,
     opponent: Option<ScannedPokemon>,
@@ -692,7 +681,6 @@ impl ScanSnapshot {
         Self {
             party: PartyUpdate::disconnected(),
             pc_storage: PcStorageUpdate::disconnected(),
-            pc_storage_address: None,
             pc_storage_diagnostic: None,
             battle_type_flags: 0,
             opponent: None,
@@ -1303,8 +1291,6 @@ fn start_keyboard_listener(
                 // Rising-edge detection: emit once per key press.
                 if combo_down && !previous_combo_down {
                     let _ = app.emit("starter-reset", ());
-
-                    log::info!("Starter reset detected: Ctrl + R");
                 }
 
                 previous_combo_down = combo_down;
@@ -1342,7 +1328,6 @@ impl ScannerState {
             .map_err(|_| "Scanner worker lock is poisoned.".to_string())?;
 
         if self.running.load(Ordering::SeqCst) {
-            log::debug!("Scanner is already running. Ignoring duplicate start request.");
             return Ok(());
         }
 
@@ -1410,110 +1395,16 @@ impl ScannerState {
                             }
 
                             if snapshot.pc_storage_diagnostic != last_pc_storage_diagnostic {
-                                if let Some(diagnostic) = snapshot.pc_storage_diagnostic.as_ref() {
-                                    log::warn!(
-                                        "PC storage memory diagnostic [{}]: {}",
-                                        profile.game.display_name(),
-                                        diagnostic
-                                    );
-                                }
-                                last_pc_storage_diagnostic =
-                                    snapshot.pc_storage_diagnostic.clone();
+                                last_pc_storage_diagnostic = snapshot.pc_storage_diagnostic.clone();
                             }
 
                             if last_pc_storage.as_ref() != Some(&snapshot.pc_storage) {
-                                let box_counts = snapshot
-                                    .pc_storage
-                                    .boxes
-                                    .iter()
-                                    .map(|box_data| {
-                                        format!(
-                                            "{:02}:{}{}{}",
-                                            box_data.index + 1,
-                                            box_data.occupied_count,
-                                            if box_data.invalid_slots.is_empty() {
-                                                String::new()
-                                            } else {
-                                                format!("+{} invalid", box_data.invalid_slots.len())
-                                            },
-                                            if snapshot.pc_storage.current_box == Some(box_data.index) {
-                                                "*"
-                                            } else {
-                                                ""
-                                            }
-                                        )
-                                    })
-                                    .collect::<Vec<_>>()
-                                    .join(", ");
-                                log::info!(
-                                    "PC storage scan [{}]: connected={}, available={}, address={}, box_array_offset=0x{:X}, current_box={}, decoded={}/420, boxes=[{}]",
-                                    profile.game.display_name(),
-                                    snapshot.pc_storage.connected,
-                                    snapshot.pc_storage.available,
-                                    snapshot
-                                        .pc_storage_address
-                                        .map(|address| format!("0x{address:08X}"))
-                                        .unwrap_or_else(|| "unresolved".to_string()),
-                                    POKEMON_STORAGE_BOXES_OFFSET,
-                                    snapshot
-                                        .pc_storage
-                                        .current_box
-                                        .map(|index| (index + 1).to_string())
-                                        .unwrap_or_else(|| "unknown".to_string()),
-                                    snapshot.pc_storage.total_pokemon,
-                                    box_counts
-                                );
-                                for box_data in &snapshot.pc_storage.boxes {
-                                    let contents = box_data
-                                        .slots
-                                        .iter()
-                                        .enumerate()
-                                        .filter_map(|(slot, pokemon)| {
-                                            pokemon.as_ref().map(|pokemon| {
-                                                format!(
-                                                    "{}:{}{}(SV {})",
-                                                    slot + 1,
-                                                    pokemon.species_name,
-                                                    if pokemon.shiny { "*" } else { "" },
-                                                    pokemon.shiny_value
-                                                )
-                                            })
-                                        })
-                                        .collect::<Vec<_>>()
-                                        .join(", ");
-                                    log::info!(
-                                        "PC storage box {:02}: {}/30 decoded, invalid_slots={:?}, contents=[{}]",
-                                        box_data.index + 1,
-                                        box_data.occupied_count,
-                                        box_data.invalid_slots,
-                                        contents
-                                    );
-                                }
                                 let _ = app.emit("pc-storage-updated", &snapshot.pc_storage);
                                 last_pc_storage = Some(snapshot.pc_storage.clone());
                             }
 
                             // Emit party changes.
                             if last_update.as_ref() != Some(&snapshot.party) {
-                                log::info!(
-                                    "Party scan [{}]: connected={}, memory count={}, decoded slots={}",
-                                    profile.game.display_name(),
-                                    snapshot.party.connected,
-                                    snapshot.party.party_count,
-                                    snapshot.party.pokemon.len()
-                                );
-
-                                for pokemon in &snapshot.party.pokemon {
-                                    log::info!(
-                                        "Party slot {}: {} (PID: {:08X}, checksum: {}, shiny: {})",
-                                        pokemon.party_slot,
-                                        pokemon.species_name,
-                                        pokemon.pid,
-                                        pokemon.checksum_valid,
-                                        pokemon.shiny
-                                    );
-                                }
-
                                 let _ = app.emit("party-updated", &snapshot.party);
                                 last_update = Some(snapshot.party.clone());
                             }
@@ -1546,12 +1437,6 @@ impl ScannerState {
                                             if let Ok(mut state) = last_opponent_state.lock() {
                                                 *state = last_emitted_opponent;
                                             }
-
-                                            log::info!(
-                                                "New wild encounter: {} (PID: {:08X})",
-                                                opponent.species_name,
-                                                opponent.pid
-                                            );
                                         }
                                     }
                                 } else {
@@ -1674,37 +1559,14 @@ fn scan_once(profile: &Gen3MemoryProfile) -> Result<ScanSnapshot, String> {
 
     // Read the player's party.
     let party = read_party(&memory, &regions, profile)?;
-    let (party_count_address, party_data_address) = party_addresses(&regions, profile)?;
-
-    if matches!(profile.game, Gen3Game::FireRed | Gen3Game::LeafGreen) {
-        log::debug!(
-            "Party memory [{}]: count @ 0x{:08X} = {}, data @ 0x{:08X} ({} bytes)",
-            profile.game.display_name(),
-            party_count_address,
-            party.count,
-            party_data_address,
-            party.pokemon_data.len()
-        );
-    }
-
     let mut pokemon = Vec::with_capacity(party.count as usize);
 
     for (slot, bytes) in party.pokemon_data.chunks_exact(POKEMON_SIZE).enumerate() {
         match decode_pokemon(bytes) {
             Ok(decoded) => {
-                if matches!(profile.game, Gen3Game::FireRed | Gen3Game::LeafGreen) {
-                    log::debug!(
-                        "Party slot {} decoded: species={}, PID={:08X}, checksum_valid={}, shiny={}",
-                        slot + 1,
-                        decoded.species,
-                        decoded.pid,
-                        decoded.checksum_valid,
-                        decoded.shiny
-                    );
-                }
                 pokemon.push(to_scanned_pokemon(decoded, (slot + 1) as u8));
             }
-            Err(error) => log::warn!("Skipping invalid party slot {}: {}", slot + 1, error),
+            Err(_) => {}
         }
     }
 
@@ -1714,26 +1576,24 @@ fn scan_once(profile: &Gen3MemoryProfile) -> Result<ScanSnapshot, String> {
         pokemon,
     };
 
-    let (pc_storage, pc_storage_address, pc_storage_diagnostic) = if party.count == 0 {
+    let (pc_storage, pc_storage_diagnostic) = if party.count == 0 {
         (
             PcStorageUpdate::unavailable(
                 true,
                 true,
                 "Waiting for a loaded game save before scanning PC storage.".to_string(),
             ),
-            None,
             Some("Party count is zero; deferred storage scan until a save is loaded.".to_string()),
         )
     } else {
         match read_pc_storage(&memory, &regions, profile.game) {
-            Ok((storage, address)) => (storage, Some(address), None),
+            Ok((storage, _address)) => (storage, None),
             Err(error) => (
                 PcStorageUpdate::unavailable(
                     true,
                     true,
                     "PC storage could not be read. Check the terminal diagnostic.".to_string(),
                 ),
-                None,
                 Some(error),
             ),
         }
@@ -1897,7 +1757,7 @@ fn scan_once(profile: &Gen3MemoryProfile) -> Result<ScanSnapshot, String> {
                     regions.iwram_address + EMERALD_TASKS_OFFSET_IWRAM,
                     EMERALD_TASK_COUNT * EMERALD_TASK_SIZE,
                 )?;
-                let active_tasks: Vec<(usize, u32, Vec<u8>)> = all_tasks
+                let _active_tasks: Vec<(usize, u32, Vec<u8>)> = all_tasks
                     .chunks_exact(EMERALD_TASK_SIZE)
                     .enumerate()
                     .filter(|(_, entry)| entry[EMERALD_TASK_ACTIVE_OFFSET] != 0)
@@ -1909,12 +1769,12 @@ fn scan_once(profile: &Gen3MemoryProfile) -> Result<ScanSnapshot, String> {
                         )
                     })
                     .collect();
-                let party_species: Vec<u16> = party_update
+                let _party_species: Vec<u16> = party_update
                     .pokemon
                     .iter()
                     .map(|pokemon| pokemon.species)
                     .collect();
-                let stage_name = match stage {
+                let _stage_name = match stage {
                     1 => "caught_or_dex_loading",
                     2 => "pokedex_page_input_ready",
                     3 => "pokedex_task_finished",
@@ -1924,7 +1784,7 @@ fn scan_once(profile: &Gen3MemoryProfile) -> Result<ScanSnapshot, String> {
                     7 => "overworld_confirmed",
                     _ => "unknown",
                 };
-                log::warn!(
+                let _ = (
                     "Emerald post-capture transition {}/24: stage={stage_name}, outcome={outcome}, comm={communication:?}, caught_species={caught_species}, wild_species={wild_species:?}, caught_opponent_match={caught_opponent_matches}, gotcha_text={gotcha_text}, battle_text_id={:?}, buffer_command={:?}, controller_function={:?}, catch_confirmed={catch_confirmed}, dex_task_id={dex_task_id:?}, dex_task_function={task_function:?}, dex_task_active={task_active:?}, dex_input_ready={dex_page_input_ready}, nickname_prompt={nickname_ready}, naming_screen={naming_screen_active}, callback2=0x{:08X}, in_battle={}, battle_flags=0x{:08X}, battle_script=0x{:08X}, held_keys=0x{:04X}, new_keys=0x{:04X}, party_count={}, party_species={party_species:?}, active_tasks={active_tasks:?}",
                     sample_number + 1,
                     emerald_runtime.battle_buffer_string_id,
@@ -1939,14 +1799,6 @@ fn scan_once(profile: &Gen3MemoryProfile) -> Result<ScanSnapshot, String> {
                     party_update.party_count,
                 );
             }
-        }
-        if !EMERALD_DEX_DIAGNOSTIC_LOGGED.swap(true, Ordering::Relaxed) {
-            log::warn!(
-                "Emerald one-time memory snapshot: outcome={outcome}, comm={communication:?}, caught_species={caught_species}, wild_species={wild_species:?}, caught_opponent_match={caught_opponent_matches}, dex_task_id={dex_task_id:?}, dex_task_function={task_function:?}, dex_task_active={task_active:?}, callback2=0x{:08X}, in_battle={}, battle_flags=0x{:08X}",
-                emerald_runtime.callback2,
-                emerald_runtime.in_battle,
-                battle_type_flags,
-            );
         }
         (
             nickname_ready,
@@ -2155,7 +2007,6 @@ fn scan_once(profile: &Gen3MemoryProfile) -> Result<ScanSnapshot, String> {
     Ok(ScanSnapshot {
         party: party_update,
         pc_storage,
-        pc_storage_address,
         pc_storage_diagnostic,
         battle_type_flags,
         opponent,

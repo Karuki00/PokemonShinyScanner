@@ -83,7 +83,6 @@ button:disabled {
   pointer-events: none;
 }
 
-.app-shell > header,
 .app-shell > .app-layout,
 .app-shell > footer {
   position: relative;
@@ -2411,10 +2410,6 @@ button.party-card {
   backdrop-filter: none;
 }
 
-.topbar {
-  background: #09150f;
-}
-
 .sidebar {
   background: rgba(12, 25, 17, 0.76);
 }
@@ -2460,11 +2455,6 @@ button.party-card {
 
 /* Translucent game-glass surfaces: the PC box and floating Pokémon remain
    visible through the interface instead of being hidden by solid panels. */
-.topbar {
-  background: rgba(9, 21, 15, 0.72);
-  backdrop-filter: blur(12px) saturate(115%);
-}
-
 .sidebar {
   background: rgba(12, 25, 17, 0.58);
   backdrop-filter: blur(10px) saturate(112%);
@@ -3407,7 +3397,7 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 
 .topbar {
   position: sticky;
-  z-index: 10;
+  z-index: 30;
   top: 0;
   height: 82px;
   padding: 0 clamp(20px, 3vw, 46px);

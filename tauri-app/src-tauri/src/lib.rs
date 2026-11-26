@@ -10,11 +10,11 @@ pub mod games;
 #[path = "scanner/mods.rs"]
 pub mod scanner;
 
+use rusqlite::{Connection, params};
 use scanner::party_scanner::{
     ScannerState, press_emulator_a, send_emulator_key, send_emulator_turn,
     set_battle_ui_diagnostic, start_scanner, stop_scanner,
 };
-use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs};
 use tauri::Manager;
@@ -26,7 +26,10 @@ struct EvTarget {
 }
 
 fn open_ev_database(app: &tauri::AppHandle) -> Result<Connection, String> {
-    let app_data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?;
     fs::create_dir_all(&app_data_dir).map_err(|error| error.to_string())?;
     let database_path = app_data_dir.join("pokemon-shiny-scanner.sqlite3");
     let connection = Connection::open(database_path).map_err(|error| error.to_string())?;
@@ -68,9 +71,12 @@ fn save_ev_targets(
     targets: HashMap<String, EvTarget>,
 ) -> Result<(), String> {
     let mut connection = open_ev_database(&app)?;
-    let transaction = connection.transaction().map_err(|error| error.to_string())?;
+    let transaction = connection
+        .transaction()
+        .map_err(|error| error.to_string())?;
     for (key, value) in targets {
-        let target_json = serde_json::to_string(&value.target).map_err(|error| error.to_string())?;
+        let target_json =
+            serde_json::to_string(&value.target).map_err(|error| error.to_string())?;
         transaction
             .execute(
                 "INSERT INTO ev_training_targets (pokemon_key, target_json, updated_at)
@@ -92,17 +98,7 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         // Keep scanner state available to Tauri commands.
         .manage(ScannerState::default())
-        .setup(|app| {
-            if cfg!(debug_assertions) {
-                app.handle().plugin(
-                    tauri_plugin_log::Builder::default()
-                        .level(log::LevelFilter::Debug)
-                        .build(),
-                )?;
-            }
-
-            Ok(())
-        });
+        .setup(|_| Ok(()));
 
     if cfg!(debug_assertions) {
         builder
