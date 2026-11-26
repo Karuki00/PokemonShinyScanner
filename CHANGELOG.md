@@ -1,5 +1,14 @@
 # Changelog
 
+## Pokemon Shiny Scanner v0.3.2
+
+### Updater Feedback Release
+
+- Prevents the updater from remaining stuck in an infinite checking state.
+- Shows a retryable failure status and the underlying error on hover.
+
+---
+
 ## Pokemon Shiny Scanner v0.3.1
 
 ### Updater Improvements

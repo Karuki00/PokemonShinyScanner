@@ -1,6 +1,6 @@
 [package]
 name = "pokemon-shiny-scanner"
-version = "0.3.1"
+version = "0.3.2"
 description = "Offline Gen III Pokémon party and shiny scanner"
 authors = ["Karuki00"]
 license = "MIT"
